@@ -183,8 +183,7 @@ if (typeof ABTest == 'undefined') {
 		}
 
 		/**
-		 * Delete a new session only cookie or updates an existing cookie with the
-		 * same name.
+		 * Delete a new session only cookie.
 		 *
 		 * @param  name @type String Cookie name.
 		 */
