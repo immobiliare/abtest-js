@@ -1,0 +1,69 @@
+<!--
+   @file
+   index.html
+
+   Simple A/B Test library. Test LoadCSS.
+
+   LICENSE
+
+   This source file is subject to the new BSD license that is bundled
+   with this package in the file LICENSE.txt.
+   It is also available through the world-wide-web at this URL:
+   http://code.google.com/p/abtest-js/wiki/License
+   If you did not receive a copy of the license and are unable to
+   obtain it through the world-wide-web, please send an email
+   to aldo.armiento@gmail.com so we can send you a copy immediately.
+
+   @see http://code.google.com/p/abtest-js/
+   @author (C) 2010 Aldo Armiento (aldo.armiento@gmail.com)
+   @author Sponsored by Gruppo Immobiliare.it S.r.l. (http://www.immobiliare.it/)
+   @version $Id$
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<title>AB Test</title>
+	<link rel="stylesheet" href="css/standard.css" type="text/css"media="screen"title="no title" charset="utf-8">
+	<script type="text/javascript" charset="utf-8" src="js/ABTest.js"></script>
+	<script type="text/javascript" charset="utf-8" src="js/ABTest/LoadCSS.js"></script>
+	<script type="text/javascript" charset="utf-8">
+		if (typeof ABTest == 'object') {
+			ABTest.enableLog(true);
+			ABTest.start('v5-beta', {
+				probability: 50, domain: '.armiento.dev.loc',
+				test: {
+					name: 'LoadCSS',
+					href: 'css/alternative.css'
+				}
+			});
+		}
+
+		function _trackClick() {
+			if (typeof ABTest != 'object' || typeof pageTracker == 'undefined') {
+				return;
+			}
+			alert('Hey, you are really ' + (ABTest.isUserLucky() ? '' : 'un') + 'lucky!');
+			pageTracker._trackEvent('Test', 'click');
+		}
+	</script>
+</head>
+<body>
+	<div id="adv">
+		<p onclick="_trackClick()">Click me!</p>
+	</div>
+</body>
+<script type="text/javascript">
+	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+	try {
+		var pageTracker = _gat._getTracker("UA-xxxxxx-x");
+		pageTracker._setCustomVar(1, 'ABTest',
+			typeof ABTest == 'object' && ABTest.isUserLucky() ? 'v5' : 'v4', 1);
+		pageTracker._trackPageview();
+	} catch(err) {}
+</script>
+</html>
