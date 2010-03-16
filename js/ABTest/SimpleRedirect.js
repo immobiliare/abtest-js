@@ -27,10 +27,10 @@ if (typeof ABTest == 'object') {
 	 * www.example.com => beta.example.com
 	 * site.v1.example.com => site.v2.example.com
 	 *
-	 * Mandatory options:
-	 *   @li @c hostPart The part (starting from 0) to be changed.
-	 *   @li @c siteLucky The domain lucky version (eg. beta)
-	 *   @li @c siteUnlucky The domain standard version (eg. www)
+	 * Options:
+	 *   @li @c hostPart (optional) The part (starting from 0) to be changed.
+	 *   @li @c siteLucky The domain lucky version (eg. beta or beta.example.com)
+	 *   @li @c siteUnlucky The domain standard version (eg. www or www.example.com)
 	 */
 	ABTest.addTest(function SimpleRedirect(options, logger) {
 		if (!options.siteLucky || !options.siteUnlucky) {
