@@ -31,10 +31,13 @@
 		if (typeof ABTest == 'object') {
 			ABTest.enableLog(true);
 			ABTest.start('v5-beta', {
-				probability: 50, domain: '.armiento.dev.loc',
+				probability: 50, domain: '.example.com',
 				test: {
 					name: 'SimpleRedirect',
-					hostPart: 0, siteLucky: 'beta', siteUnlucky: 'www'
+					siteLucky: 'www.google.com', siteUnlucky: 'www.bing.com'
+					// hostPart: 1, siteLucky: 'google', siteUnlucky: 'bing'
+					// More seriously:
+					// hostPart: 0, siteLucky: 'beta', siteUnlucky: 'www'
 				}
 			});
 		}

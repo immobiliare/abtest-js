@@ -33,8 +33,7 @@ if (typeof ABTest == 'object') {
 	 *   @li @c siteUnlucky The domain standard version (eg. www)
 	 */
 	ABTest.addTest(function SimpleRedirect(options, logger) {
-		if (typeof options.hostPart == 'undefined' ||
-			!options.siteLucky || !options.siteUnlucky) {
+		if (!options.siteLucky || !options.siteUnlucky) {
 			logger.error('Missing host part and/or site specs.');
 			return;
 		}
@@ -45,18 +44,22 @@ if (typeof ABTest == 'object') {
 			return;
 		}
 
-		var winLoc = window.location;
-		var hostParts = winLoc.hostname.split('.');
-		var siteType = ABTest.isUserLucky() ?
+		var site = ABTest.isUserLucky() ?
 			options.siteLucky : options.siteUnlucky;
 
-		if (siteType == hostParts[options.hostPart]) {
+		var winLoc = window.location;
+		if (typeof options.hostPart != 'undefined' && options.hostPart >= 0) {
+			var hostParts = winLoc.hostname.split('.');
+			hostParts[options.hostPart] = site;
+			site = hostParts.join('.');
+		}
+
+		if (site == winLoc.hostname) {
 			logger.log('No redirection needed.');
 			return;
 		}
 
-		hostParts[options.hostPart] = siteType;
-		var url = winLoc.protocol + '//' + hostParts.join('.') +
+		var url = winLoc.protocol + '//' + site +
 			(winLoc.port ? ':' + winLoc.port : '') +
 			winLoc.pathname + winLoc.search + winLoc.hash;
 
