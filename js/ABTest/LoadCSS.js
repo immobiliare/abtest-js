@@ -44,7 +44,7 @@ if (typeof ABTest == 'object') {
 		linkElement.setAttribute('media', options.media ? options.media : 'screen');
 		linkElement.setAttribute('href', options.href);
 
-		var headElement = document.getElementsByTagName("head");
+		var headElement = document.getElementsByTagName('head');
 		if (headElement && headElement[0]) {
 			logger.log('Loading CSS from ' + options.href);
 			headElement[0].appendChild(linkElement);

@@ -316,7 +316,7 @@ if (typeof ABTest == 'undefined') {
 		 * Logs a message.
 		 *
 		 * @param  message @type mixed Log message.
-		 * @param  priority @type String Message prioriti (log, debug, info, warning, error).
+		 * @param  priority @type String Message priority (log, debug, info, warning, error).
 		 */
 		function _log(message, priority) {
 			_logEnabled && console[priority || 'debug']('[ABTest] %s: %s',
