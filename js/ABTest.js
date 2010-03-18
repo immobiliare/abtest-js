@@ -90,6 +90,8 @@ if (typeof ABTest == 'undefined') {
 
 			if (_userSession()) {
 				_runTest();
+			} else {
+				_log('Cookies are not supported, skipping test...');
 			}
 		}
 
@@ -116,9 +118,7 @@ if (typeof ABTest == 'undefined') {
 		 *
 		 * @param  testFunction @type Function Test function.
 		 */
-		this.addTest = function (testFunction) {
-			var testName = testFunction.name;
-
+		this.addTest = function (testName, testFunction) {
 			if (!testName) {
 				_error('The test function must have a name that is the test name.');
 				return;
@@ -319,7 +319,8 @@ if (typeof ABTest == 'undefined') {
 		 * @param  priority @type String Message priority (log, debug, info, warning, error).
 		 */
 		function _log(message, priority) {
-			_logEnabled && console[priority || 'debug']('[ABTest] %s: %s',
+			_logEnabled && typeof console != 'undefined' && 
+				console[priority || 'debug']('[ABTest] %s: %s',
 				arguments.callee.caller.name || 'main', message);
 		}
 

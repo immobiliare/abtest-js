@@ -32,7 +32,7 @@ if (typeof ABTest == 'object') {
 	 *   @li @c siteLucky The domain lucky version (eg. beta or beta.example.com)
 	 *   @li @c siteUnlucky The domain standard version (eg. www or www.example.com)
 	 */
-	ABTest.addTest(function SimpleRedirect(options, logger) {
+	ABTest.addTest('SimpleRedirect', function (options, logger) {
 		if (!options.siteLucky || !options.siteUnlucky) {
 			logger.error('Missing host part and/or site specs.');
 			return;

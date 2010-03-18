@@ -28,7 +28,7 @@ if (typeof ABTest == 'object') {
 	 *   @li @c href The CSS file path.
 	 *   @li @c media The CSS media type (default: screen).
 	 */
-	ABTest.addTest(function LoadCSS(options, logger) {
+	ABTest.addTest('LoadCSS', function (options, logger) {
 		if (!ABTest.isUserLucky()) {
 			logger.log('Sorry, user is unlucky, no alternative CSS will be loaded.');
 			return;
