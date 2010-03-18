@@ -22,12 +22,12 @@
 if (typeof ABTest == 'undefined') {
 	var ABTest = new function () {
 
-		const COOKIE_PREFIX = 'ABTest_'; /**< @type String Cookie prefix. */
+		var COOKIE_PREFIX = 'ABTest_'; /**< @type String (constant) Cookie prefix. */
 
-		const NOW = new Date().getTime(); /**< @type Number Current timestamp. */
+		var NOW = new Date().getTime(); /**< @type Number (constant) Current timestamp. */
 
-		const TEST_SESSION = { hours: 48 }; /**< @type object Default test session duration. */
-		const MAX_TEST_SESSION = { days: 7 }; /**< @type object Default maximum test session duration. */
+		var TEST_SESSION = { hours: 48 }; /**< @type object (constant) Default test session duration. */
+		var MAX_TEST_SESSION = { days: 7 }; /**< @type object (constant) Default maximum test session duration. */
 
 		var _logEnabled = false; /**< @type Boolean True to enable event log, false otherwise. */
 		var _luckiness = false; /**< @type Boolean True if user is lucky, false otherwise. */
@@ -255,9 +255,9 @@ if (typeof ABTest == 'undefined') {
 		 * @return @type Number Duration in microseconds.
 		 */
 		function _getTime(duration) {
-			const MIN = 60 * 1000;
-			const HOUR = 60 * MIN;
-			const DAY = 24 * HOUR;
+			var MIN = 60 * 1000;
+			var HOUR = 60 * MIN;
+			var DAY = 24 * HOUR;
 			duration = duration || {};
 			return (duration.days	 || 0) * DAY +
 				   (duration.day	 || 0) * DAY +
