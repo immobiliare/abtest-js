@@ -29,10 +29,10 @@ if (typeof ABTest == 'undefined') {
 		var TEST_SESSION = { hours: 48 }; /**< @type object (constant) Default test session duration. */
 		var MAX_TEST_SESSION = { days: 7 }; /**< @type object (constant) Default maximum test session duration. */
 
-		var _logEnabled = false; /**< @type Boolean True to enable event log, false otherwise. */
-		var _luckiness = false; /**< @type Boolean True if user is lucky, false otherwise. */
+		var _logEnabled = false; /**< @type Boolean True to enable the event log, false otherwise. */
+		var _luckiness = false; /**< @type Boolean True if the user is lucky, false otherwise. */
 
-		var _running = false; /**< @type Boolean Test is running and can not be re-executed. */
+		var _running = false; /**< @type Boolean Test is running and cannot be re-executed. */
 		var _testName; /**< @type String Current A/B Test name. */
 		var _testOptions = {}; /**< @type object Current A/B Test options. */
 
@@ -45,7 +45,7 @@ if (typeof ABTest == 'undefined') {
 		 * @param  options @type object Test options:
 		 *		   @li @c session (optional, default TEST_SESSION) Session duration
 		 *		   @li @c maxSession (optional, default MAX_TEST_SESSION) Session max duration
-		 *		   @li @c probability User lucky/unlucky probability
+		 *		   @li @c probability Luckyness probability
 		 *		   @li @c path (optional, default /) Site path validity (cookie path)
 		 *		   @li @c domain (optional, default empty) Site domain validity (cookie domain)
 		 *		   @li @c secure (optional, default false) Use https protocol (cookie secure)
@@ -71,7 +71,7 @@ if (typeof ABTest == 'undefined') {
 			}
 
 			if (typeof _allTests[options.test.name] != 'function') {
-				_error("Test '" + options.test.name + "' does not loaded.");
+				_error("Test '" + options.test.name + "' did not load.");
 				return;
 			}
 
@@ -120,7 +120,7 @@ if (typeof ABTest == 'undefined') {
 		 */
 		this.addTest = function (testName, testFunction) {
 			if (!testName) {
-				_error('The test function must have a name that is the test name.');
+				_error('The test function must be named');
 				return;
 			}
 			if (_allTests[testName]) {
@@ -153,7 +153,7 @@ if (typeof ABTest == 'undefined') {
 		 * Tests if a cookie exists.
 		 *
 		 * @param  name @type String Cookie name
-		 * @return @type Boolean True if cookie esists, false otherwise.
+		 * @return @type Boolean True if the cookie exsists, false otherwise.
 		 */
 		this.cookieExists = function (name) {
 			return typeof _getCookie(COOKIE_PREFIX + _testName + '_' + name) != 'undefined';
@@ -163,7 +163,7 @@ if (typeof ABTest == 'undefined') {
 		 * Get a cookie value by name.
 		 *
 		 * @param  name @type String Cookie name
-		 * @return @type String The cookie value or undefined if no cookie
+		 * @return @type String The cookie value, or undefined if no cookie
 		 *		   exists with that name.
 		 */
 		this.getCookie = function (name) {
@@ -171,7 +171,7 @@ if (typeof ABTest == 'undefined') {
 		}
 
 		/**
-		 * Setup a new session only cookie or updates an existing cookie with the
+		 * Setup a new session-only cookie or updates an existing cookie with the
 		 * same name.
 		 *
 		 * @param  name @type String Cookie name.
@@ -183,7 +183,7 @@ if (typeof ABTest == 'undefined') {
 		}
 
 		/**
-		 * Delete a new session only cookie.
+		 * Delete a new session-only cookie.
 		 *
 		 * @param  name @type String Cookie name.
 		 */
@@ -193,7 +193,7 @@ if (typeof ABTest == 'undefined') {
 		}
 
 		/**
-		 * Runs current test.
+		 * Runs the current test.
 		 */
 		function _runTest() {
 			_allTests[_testOptions.test.name](
@@ -201,8 +201,8 @@ if (typeof ABTest == 'undefined') {
 		}
 
 		/**
-		 * Manages test cookie (creation and expiration) and, if cookie does not
-		 * exists, draws the user.
+		 * Manages test cookie creation and expiration and, if cookie does not
+		 * exist, draws the user.
 		 *
 		 * @return @type Boolean True if cookies are supported, false otherwise.
 		 */
@@ -223,8 +223,8 @@ if (typeof ABTest == 'undefined') {
 				new Date(NOW + _getTime(_testOptions.session)) : null;
 
 			_log('The user has' + (expirationDate ? ' not' : '') +
-				' reached maxSession. Cookie expiration date is ' +
-				(expirationDate ? expirationDate : 'at the end of the current session.'));
+				' reached maxSession. Cookie expires ' +
+				(expirationDate ? 'on ' + expirationDate : 'at the end of the current session.'));
 
 			_setCookie(COOKIE_PREFIX + _testName, cookieValue,
 				expirationDate, _testOptions.path, _testOptions.domain, _testOptions.secure);
@@ -239,7 +239,7 @@ if (typeof ABTest == 'undefined') {
 		 * @return @type Number In range 0..1 0 => User is unlucky, 1 => User is lucky.
 		 */
 		function _drawUser(probability) {
-			var isUserLucky = !Math.floor(Math.random() * 100 / probability);
+            var isUserLucky =((Math.random()*100 - probability) <= 0);
 			_log('Is current user lucky? Probability is ' + probability + '%... ' +
 				(isUserLucky ? 'Yes!' : 'No!'));
 			return new Number(isUserLucky);
@@ -289,7 +289,7 @@ if (typeof ABTest == 'undefined') {
 				_log('Cookie name: ' + name + ' - Cookie value: ' + cookieValue);
 				return cookieValue;
 			}
-			_log('Cookie ' + name + ' does not exists.');
+			_log('Cookie ' + name + ' does not exist.');
 		}
 
 		/**
