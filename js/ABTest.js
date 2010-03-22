@@ -239,7 +239,7 @@ if (typeof ABTest == 'undefined') {
 		 * @return @type Number In range 0..1 0 => User is unlucky, 1 => User is lucky.
 		 */
 		function _drawUser(probability) {
-            var isUserLucky =((Math.random()*100 - probability) <= 0);
+			var isUserLucky = ((Math.random() * 100 - probability) <= 0);
 			_log('Is current user lucky? Probability is ' + probability + '%... ' +
 				(isUserLucky ? 'Yes!' : 'No!'));
 			return new Number(isUserLucky);
