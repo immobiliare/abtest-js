@@ -27,6 +27,9 @@ if (typeof ABTest == 'object') {
 	 * www.example.com => beta.example.com
 	 * site.v1.example.com => site.v2.example.com
 	 *
+	 * In the SimpleRedirect cookie it stores the referer, in this way it 
+	 * can be retrieved after the redirect in the ABTest._referrer variable
+	 *
 	 * Options:
 	 *   @li @c hostPart (optional) The part (starting from 0) to be changed.
 	 *   @li @c siteLucky The domain lucky version (eg. beta or beta.example.com)
@@ -39,6 +42,9 @@ if (typeof ABTest == 'object') {
 		}
 
 		if (ABTest.cookieExists('SimpleRedirect')) {
+			if(ABTest.getCookie('SimpleRedirect') != '') {
+				ABTest._referrer = ABTest.getCookie('SimpleRedirect');
+			}
 			logger.log('Potential loop detected, exiting.');
 			ABTest.deleteCookieSession('SimpleRedirect');
 			return;
@@ -63,7 +69,7 @@ if (typeof ABTest == 'object') {
 			(winLoc.port ? ':' + winLoc.port : '') +
 			winLoc.pathname + winLoc.search + winLoc.hash;
 
-		ABTest.setCookieSession('SimpleRedirect', 'noLoop');
+		ABTest.setCookieSession('SimpleRedirect', (typeof document.referrer != 'undefined') ? document.referrer : '');
 		logger.log('Redirecting to ' + url);
 		window.location.replace(url);
 	});

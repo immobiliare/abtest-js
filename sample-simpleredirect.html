@@ -61,8 +61,13 @@
 <script type="text/javascript">
 	try {
 		var pageTracker = _gat._getTracker("UA-xxxxxx-x");
-		pageTracker._setCustomVar(1, 'ABTest',
-			typeof ABTest == 'object' && ABTest.isUserLucky() ? 'v5' : 'v4', 1);
+		if(typeof ABTest == 'object') {
+			pageTracker._setCustomVar(1, 'ABTest', ABTest.isUserLucky() ? 'v5' : 'v4', 1);
+			//After a redirect, some browser lost the referrer, SimpleRedirect safely store it in the ABTest._referrer property:
+			if(typeof ABTest._referrer != 'undefined') {
+				pageTracker._setReferrerOverride(ABTest._referrer);
+			}
+		}
 		pageTracker._trackPageview();
 	} catch(err) {}
 </script>
