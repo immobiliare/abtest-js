@@ -50,6 +50,8 @@ if (typeof ABTest == 'undefined') {
 		 *		   @li @c domain (optional, default empty) Site domain validity (cookie domain)
 		 *		   @li @c secure (optional, default false) Use https protocol (cookie secure)
 		 *		   @li @c test Specific test options (test must exists)
+		 *		   @li @c force (optional, default empty) Parameter name to enable version forcing
+		 *		          (-1 always unlucky, 0 no-force, 1 always lucky)
 		 */
 		this.start = function (name, options) {
 			if (_running) {
@@ -82,6 +84,8 @@ if (typeof ABTest == 'undefined') {
 			options.path = options.path || '/';
 			options.domain = options.domain || '';
 			options.secure = options.secure || false;
+			
+			options.force = options.force || '';
 
 			_testName = name;
 			_testOptions = options;
@@ -105,7 +109,7 @@ if (typeof ABTest == 'undefined') {
 		}
 
 		/**
-		 * Enable/disable log.
+		 * User luckiness.
 		 *
 		 * @return @type Boolean True if the current user is lucky.
 		 */
@@ -207,7 +211,15 @@ if (typeof ABTest == 'undefined') {
 		 * @return @type Boolean True if cookies are supported, false otherwise.
 		 */
 		function _userSession() {
-			var cookieValue = _getCookie(COOKIE_PREFIX + _testName);
+			
+			var cookieValue, force;
+			if ((force = _getForce()) != 0) {
+				_log('Current user is ' + (force == -1 ? 'un' : '') + 'lucky (forced)');
+				cookieValue = NOW + ';' + (force == -1 ? '0' : '1');
+			} else {
+				cookieValue = _getCookie(COOKIE_PREFIX + _testName);
+			}
+
 			var cookieValues = cookieValue ? cookieValue.split(';') :
 				new Array(NOW, _drawUser(_testOptions.probability));
 			cookieValue = cookieValues.join(';');
@@ -290,6 +302,28 @@ if (typeof ABTest == 'undefined') {
 				return cookieValue;
 			}
 			_log('Cookie ' + name + ' does not exist.');
+		}
+
+		/**
+		 * Get the force parameter value.
+		 *
+		 * @return @type Number The force parameter value.
+		 */
+		function _getForce() {
+			if (_testOptions.force == '') {
+				_log('Version forcing is disabled.');
+				return 0;
+			}
+			var regExp = new RegExp('[?&]' + _testOptions.force + '=(-?1)(&|$)');
+			var matches = regExp.exec(window.location.search);
+			if (!matches) {
+				_log('Version forcing is enabled with parameter ' + _testOptions.force +
+					' but no valid force parameter was specified in the query string (' + window.location.search + ')');
+				return 0;
+			}
+			var numRet = parseInt(matches[1]);
+			_log('Version forcing is enabled with parameter ' + _testOptions.force + ' = ' + numRet);
+			return numRet;
 		}
 
 		/**
