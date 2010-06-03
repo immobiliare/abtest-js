@@ -42,8 +42,11 @@ if (typeof ABTest == 'object') {
 		}
 
 		if (ABTest.cookieExists('SimpleRedirect')) {
-			if(ABTest.getCookie('SimpleRedirect') != '') {
+			if(ABTest.getCookie('SimpleRedirect') != 'NULL') {
 				ABTest._referrer = ABTest.getCookie('SimpleRedirect');
+			}
+			else {
+				ABTest._referrer = ''; //Force an empty referer
 			}
 			logger.log('Potential loop detected, exiting.');
 			ABTest.deleteCookieSession('SimpleRedirect');
@@ -69,7 +72,7 @@ if (typeof ABTest == 'object') {
 			(winLoc.port ? ':' + winLoc.port : '') +
 			winLoc.pathname + winLoc.search + winLoc.hash;
 
-		ABTest.setCookieSession('SimpleRedirect', (typeof document.referrer != 'undefined') ? document.referrer : '');
+		ABTest.setCookieSession('SimpleRedirect', (typeof document.referrer != 'undefined') ? document.referrer : 'NULL');
 		logger.log('Redirecting to ' + url);
 		window.location.replace(url);
 	});

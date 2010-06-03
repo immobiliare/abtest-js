@@ -62,11 +62,12 @@
 	try {
 		var pageTracker = _gat._getTracker("UA-xxxxxx-x");
 		if(typeof ABTest == 'object') {
-			pageTracker._setCustomVar(1, 'ABTest', ABTest.isUserLucky() ? 'v5' : 'v4', 1);
 			//After a redirect, some browser lost the referrer, SimpleRedirect safely store it in the ABTest._referrer property:
+			//WARNING: for an undocumented bug the call to _setReferrerOverride must be before _setCustomVar
 			if(typeof ABTest._referrer != 'undefined') {
 				pageTracker._setReferrerOverride(ABTest._referrer);
 			}
+			pageTracker._setCustomVar(1, 'ABTest', ABTest.isUserLucky() ? 'v5' : 'v4', 1);
 		}
 		pageTracker._trackPageview();
 	} catch(err) {}
