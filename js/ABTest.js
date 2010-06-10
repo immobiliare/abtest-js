@@ -297,7 +297,7 @@ if (typeof ABTest == 'undefined') {
 				if (currentCookie[0].trim() != name.trim()) {
 					continue;
 				}
-				var cookieValue = unescape(currentCookie[1].trim());
+				var cookieValue = currentCookie.length > 1 ? unescape(currentCookie[1].trim()) : '';
 				_log('Cookie name: ' + name + ' - Cookie value: ' + cookieValue);
 				return cookieValue;
 			}
