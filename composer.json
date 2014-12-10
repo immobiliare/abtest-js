@@ -1,0 +1,13 @@
+{
+    "name": "immobiliare/abtest-js",
+    "description": "A simple AB test javascript library",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Immobiliare.it",
+            "email": "opensource@immobiliare.it"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}

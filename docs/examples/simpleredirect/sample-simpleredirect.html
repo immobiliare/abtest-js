@@ -9,15 +9,13 @@
    This source file is subject to the new BSD license that is bundled
    with this package in the file LICENSE.txt.
    It is also available through the world-wide-web at this URL:
-   http://code.google.com/p/abtest-js/wiki/License
+   http://opensource.org/licenses/BSD-3-Clause
    If you did not receive a copy of the license and are unable to
    obtain it through the world-wide-web, please send an email
-   to aldo.armiento@gmail.com so we can send you a copy immediately.
-
-   @see http://code.google.com/p/abtest-js/
-   @author (C) 2010 Aldo Armiento (aldo.armiento@gmail.com)
-   @author Sponsored by Gruppo Immobiliare.it S.r.l. (http://www.immobiliare.it/)
-   @version $Id$
+   to opensource@immobiliare.it so we can send you a copy immediately.
+  
+   @see https://github.com/immobiliare/abtest-js
+   @author (C) 2010 Immobiliare.it <opensource@immobiliare.it>
 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -25,8 +23,8 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 	<title>AB Test</title>
-	<script type="text/javascript" charset="utf-8" src="js/ABTest.js"></script>
-	<script type="text/javascript" charset="utf-8" src="js/ABTest/SimpleRedirect.js"></script>
+	<script type="text/javascript" charset="utf-8" src="../../../src/ABTest.js"></script>
+	<script type="text/javascript" charset="utf-8" src="../../../src/ABTest/SimpleRedirect.js"></script>
 	<script type="text/javascript" charset="utf-8">
 		if (typeof ABTest == 'object') {
 			ABTest.enableLog(true);
@@ -34,10 +32,7 @@
 				probability: 50, domain: '.example.com',
 				test: {
 					name: 'SimpleRedirect',
-					siteLucky: 'www.google.com', siteUnlucky: 'www.bing.com'
-					// hostPart: 1, siteLucky: 'google', siteUnlucky: 'bing'
-					// More seriously:
-					// hostPart: 0, siteLucky: 'beta', siteUnlucky: 'www'
+					siteLucky: 'a.example.com', siteUnlucky: 'b.example.com'
 				}
 			});
 		}
@@ -62,8 +57,8 @@
 	try {
 		var pageTracker = _gat._getTracker("UA-xxxxxx-x");
 		if(typeof ABTest == 'object') {
-			//After a redirect, some browser lost the referrer, SimpleRedirect safely store it in the ABTest._referrer property:
-			//WARNING: for an undocumented bug the call to _setReferrerOverride must be before _setCustomVar
+			//After a redirect, some browser lose the referrer, SimpleRedirect safely stores it in the ABTest._referrer property:
+			//WARNING: for an undocumented bug the call to _setReferrerOverride must be set before _setCustomVar
 			if(typeof ABTest._referrer != 'undefined') {
 				pageTracker._setReferrerOverride(ABTest._referrer);
 			}

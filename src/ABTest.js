@@ -9,15 +9,13 @@
  * This source file is subject to the new BSD license that is bundled
  * with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://code.google.com/p/abtest-js/wiki/License
+ * http://opensource.org/licenses/BSD-3-Clause
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
- * to aldo.armiento@gmail.com so we can send you a copy immediately.
+ * to opensource@immobiliare.it so we can send you a copy immediately.
  *
- * @see http://code.google.com/p/abtest-js/
- * @author (C) 2010 Aldo Armiento (aldo.armiento@gmail.com)
- * @author Sponsored by Gruppo Immobiliare.it S.r.l. (http://www.immobiliare.it/)
- * @version $Id$
+ * @see https://github.com/immobiliare/abtest-js
+ * @author (C) 2010 Immobiliare.it <opensource@immobiliare.it>
  */
 if (typeof ABTest == 'undefined') {
 	var ABTest = new function () {
