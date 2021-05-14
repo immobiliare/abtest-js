@@ -29,13 +29,17 @@
 		if (typeof ABTest == 'object') {
 			ABTest.enableLog(true);
 			ABTest.start('v5-beta', {
-				probability: 50, domain: '.example.com',
+				audience: 70,
+				probability: 90, /* domain: '.example.com', */
+				/*redrawOnProbabilityChange: true,		   */
+				/*reparticipateOnProbabilityChange: true, */
 				test: {
-					name: 'SimpleRedirect',
-					siteLucky: 'a.example.com', siteUnlucky: 'b.example.com'
+					name: 'SimpleRedirect',					
+					siteLucky: 'a.example.com'
 				}
 			});
 		}
+		
 	</script>
 </head>
 <body>
@@ -50,20 +54,28 @@
 	</div>
 </body>
 <script type="text/javascript">
-	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+	/*var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
 	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+	*/
 </script>
 <script type="text/javascript">
 	try {
-		var pageTracker = _gat._getTracker("UA-xxxxxx-x");
+		//var pageTracker = _gat._getTracker("UA-xxxxxx-x");
 		if(typeof ABTest == 'object') {
 			//After a redirect, some browser lose the referrer, SimpleRedirect safely stores it in the ABTest._referrer property:
 			//WARNING: for an undocumented bug the call to _setReferrerOverride must be set before _setCustomVar
 			if(typeof ABTest._referrer != 'undefined') {
 				pageTracker._setReferrerOverride(ABTest._referrer);
 			}
-			pageTracker._setCustomVar(1, 'ABTest', ABTest.isUserLucky() ? 'v5' : 'v4', 1);
+
+			console.log(ABTest.isUserPartecipating());
+			console.log(ABTest.isUserLucky());
+
+			if (ABTest.isUserPartecipating()) {
+				pageTracker._setCustomVar(1, 'ABTest', ABTest.isUserLucky() ? 'v5' : 'v4', 1);
+			}
 		}
+
 		pageTracker._trackPageview();
 	} catch(err) {}
 </script>

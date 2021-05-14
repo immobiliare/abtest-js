@@ -35,7 +35,7 @@ if (typeof ABTest == 'object') {
          *   @li @c siteUnlucky The domain standard version (eg. www or www.example.com)
          */
 	ABTest.addTest('SimpleRedirect', function (options, logger) {
-		if (!options.siteLucky || !options.siteUnlucky) {
+		if (!options.siteLucky /*|| !options.siteUnlucky*/) {
 			logger.error('Missing host part and/or site specs.');
 			return;
 		}
@@ -55,6 +55,10 @@ if (typeof ABTest == 'object') {
 		var site = ABTest.isUserLucky() ?
 			options.siteLucky : options.siteUnlucky;
 
+		if (site == undefined) {
+			logger.log("User is " + (ABTest.isUserLucky() ? "Lucky" : "Not Lucky") + " and no redirect will take place because associated site is not defined");
+			return;
+		}
 
 		var winLoc = window.location;
 		if (typeof options.hostPart != 'undefined' && options.hostPart >= 0) {
@@ -74,6 +78,6 @@ if (typeof ABTest == 'object') {
 
 		ABTest.setCookieSession('SimpleRedirect', (typeof document.referrer != 'undefined') ? document.referrer : 'NULL');
 		logger.log('Redirecting to ' + url);
-		window.location.replace(url);
+		//window.location.replace(url);
 	});
 }

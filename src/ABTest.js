@@ -29,6 +29,7 @@ if (typeof ABTest == 'undefined') {
 
 		var _logEnabled = false; /**< @type Boolean True to enable the event log, false otherwise. */
 		var _luckiness = false; /**< @type Boolean True if the user is lucky, false otherwise. */
+		var _isUserPartecipating = false; /**< @type Boolean True if the user is partecipating, false otherwise. */
 
 		var _running = false; /**< @type Boolean Test is running and cannot be re-executed. */
 		var _testName; /**< @type String Current A/B Test name. */
@@ -43,7 +44,10 @@ if (typeof ABTest == 'undefined') {
 		 * @param  options @type object Test options:
 		 *		   @li @c session (optional, default TEST_SESSION) Session duration
 		 *		   @li @c maxSession (optional, default MAX_TEST_SESSION) Session max duration
-		 *		   @li @c probability Luckyness probability
+		 *		   @li @c audience percentage of targeted visitors partecipating to the test
+		 *		   @li @c probability Luckyness probability		 
+		 *		   @li @c reparticipateOnProbabilityChange redraw if probability is changed since drawed
+		 *		   @li @c redrawOnProbabilityChange redraw if probability is changed since drawed
 		 *		   @li @c path (optional, default /) Site path validity (cookie path)
 		 *		   @li @c domain (optional, default empty) Site domain validity (cookie domain)
 		 *		   @li @c secure (optional, default false) Use https protocol (cookie secure)
@@ -78,12 +82,16 @@ if (typeof ABTest == 'undefined') {
 			options.session = options.session || TEST_SESSION;
 			options.maxSession = options.maxSession || MAX_TEST_SESSION;
 
-			options.probability = options.probability || 0;
+			options.probability = options.probability || 50;
+			options.audience = options.audience || 100;
 			options.path = options.path || '/';
 			options.domain = options.domain || '';
 			options.secure = options.secure || false;
-			
+
 			options.force = options.force || '';
+
+			options.reparticipateOnProbabilityChange = options.reparticipateOnProbabilityChange || false;
+			options.redrawOnProbabilityChange = options.redrawOnProbabilityChange || false;
 
 			_testName = name;
 			_testOptions = options;
@@ -112,7 +120,16 @@ if (typeof ABTest == 'undefined') {
 		 * @return @type Boolean True if the current user is lucky.
 		 */
 		this.isUserLucky = function () {
-			return _luckiness;
+			return _luckiness == 1;
+		}
+
+		/**
+		 * User Partecipating.
+		 *
+		 * @return @type Boolean True if the current user is partecipating.
+		 */
+		this.isUserPartecipating = function () {
+			return _isUserPartecipating == 1;
 		}
 
 		/**
@@ -194,12 +211,13 @@ if (typeof ABTest == 'undefined') {
 				_testOptions.path, _testOptions.domain, _testOptions.secure);
 		}
 
+
 		/**
 		 * Runs the current test.
 		 */
 		function _runTest() {
 			_allTests[_testOptions.test.name](
-				_testOptions.test, {log: _log, error: _error});
+				_testOptions.test, { log: _log, error: _error });
 		}
 
 		/**
@@ -209,37 +227,156 @@ if (typeof ABTest == 'undefined') {
 		 * @return @type Boolean True if cookies are supported, false otherwise.
 		 */
 		function _userSession() {
-			
-			var cookieValue, force;
+
+			var isPartecipating,
+				isPartecipatingCookieValue,
+				isPartecipatingCookieValues,
+				cookieValue,
+				cookieValues,
+				force,
+				drawTime,
+				wasUserLucky,
+				probability,
+				audience;
+
 			if ((force = _getForce()) != 0) {
 				_log('Current user is ' + (force == -1 ? 'un' : '') + 'lucky (forced)');
-				cookieValue = NOW + ';' + (force == -1 ? '0' : '1');
+				cookieValue = NOW + ';' + (force == -1 ? '0' : '1') + ';' + _testOptions.probability + ';' + _testOptions.audience;
+				_log('Current user is partecipating (forced)');
+				isPartecipatingCookieValue = NOW + ';' + '1' + ';' + _testOptions.probability + ';' + _testOptions.audience;
 			} else {
 				cookieValue = _getCookie(COOKIE_PREFIX + _testName);
+				isPartecipatingCookieValue = _getCookie(COOKIE_PREFIX + _testName + '_isPartecipating');
 			}
 
-			var cookieValues = cookieValue ? cookieValue.split(';') :
-				new Array(NOW, _drawUser(_testOptions.probability));
-			cookieValue = cookieValues.join(';');
+			if (cookieValue && !isPartecipatingCookieValue) {
+				cookieValues = cookieValue.split(';');
+				cookieValues[2] = cookieValues[2] != undefined ? cookieValues[2] : _testOptions.probability;
+				cookieValues[3] = cookieValues[3] != undefined ? cookieValues[3] : _testOptions.audience;
+				isPartecipatingCookieValue = cookieValues[0] + ';' + '1' + ';' + cookieValues[2] + ';' + cookieValues[3];
+			}
 
-			var drawTime = parseInt(cookieValues[0]) || 0;
-			var wasUserLucky = _luckiness = parseInt(cookieValues[1]) > 0;
+			isPartecipatingCookieValues = isPartecipatingCookieValue ? isPartecipatingCookieValue.split(';') : null;
+			isPartecipating = isPartecipatingCookieValues ? parseInt(isPartecipatingCookieValues[1]) : null;
+			audience = isPartecipatingCookieValues ? parseInt(isPartecipatingCookieValues[3]) : null;
+			probability = isPartecipatingCookieValues ? parseInt(isPartecipatingCookieValues[2]) : null;
+			drawTime = isPartecipatingCookieValues ? parseInt(isPartecipatingCookieValues[0]) : null;
 
-			_log('The user has been drawn on '+ new Date(drawTime) +
-				(drawTime == NOW ? ' (just now!)' : '') + ' and was ' +
-				(wasUserLucky ? '' : 'un') + 'lucky.');
+			if (
+				(
+					(_testOptions.reparticipateOnProbabilityChange && 
+						probability !== null &&
+						probability != _testOptions.probability
+					) ||
+					audience != _testOptions.audience
+				) &&
+				force == 0 &&
+				isPartecipating !== null && !isPartecipating
+			) {
+				var logMessage = 'The user is ';
+				logMessage += (!isPartecipating ? 'NOT ' : '');
+				logMessage += 'partecipating since ' + new Date(drawTime);
+				if (audience != _testOptions.audience) {
+					logMessage += ' but by audience change from ';
+					logMessage += audience;
+					logMessage += ' to ';
+					logMessage += _testOptions.audience;
+				} else {
+					logMessage += ' but by probability change from ';
+					logMessage += probability;
+					logMessage += ' to ';
+					logMessage += _testOptions.probability;
+					logMessage += ' it will be redrawned (reparticipateOnProbabilityChange = true)';
+				}
+
+				_log(logMessage)
+
+				isPartecipatingCookieValues = null;
+				cookieValues = null;
+				_deleteCookie(COOKIE_PREFIX + _testName);
+			}
+
+			isPartecipating = _isUserPartecipating = isPartecipatingCookieValues ? parseInt(isPartecipatingCookieValues[1]) : _drawUserElegibility(_testOptions.audience);
+			isPartecipatingCookieValues = isPartecipatingCookieValues ? isPartecipatingCookieValues :
+				new Array(NOW, isPartecipating, _testOptions.probability, _testOptions.audience);
+			isPartecipatingCookieValue = isPartecipatingCookieValues.join(';');
+
+			drawTime = parseInt(isPartecipatingCookieValues[0]);
+			isPartecipating = parseInt(isPartecipatingCookieValues[1]);
+			probability = parseInt(isPartecipatingCookieValues[2]);
+			audience = parseInt(isPartecipatingCookieValues[3]);
 
 			var expirationDate = NOW - drawTime <= _getTime(_testOptions.maxSession) ?
 				new Date(NOW + _getTime(_testOptions.session)) : null;
+
+			_setCookie(COOKIE_PREFIX + _testName + '_isPartecipating', isPartecipatingCookieValue,
+				expirationDate, _testOptions.path, _testOptions.domain, _testOptions.secure);
+
+			if (!isPartecipating) {
+				_deleteCookie(COOKIE_PREFIX + _testName);
+			}
+
+			_log('The user was drawned to be ' +
+				(!isPartecipating ? 'NOT' : '') +
+				' elegible on ' + new Date(drawTime) +
+				(drawTime == NOW ? ' (just now!)' : ''));
 
 			_log('The user has' + (expirationDate ? ' not' : '') +
 				' reached maxSession. Cookie expires ' +
 				(expirationDate ? 'on ' + expirationDate : 'at the end of the current session.'));
 
-			_setCookie(COOKIE_PREFIX + _testName, cookieValue,
-				expirationDate, _testOptions.path, _testOptions.domain, _testOptions.secure);
 
-			return _getCookie(COOKIE_PREFIX + _testName) == cookieValue;
+			if (isPartecipating) {
+				cookieValues = cookieValue ? cookieValue.split(';') : null;
+				cookieValues = cookieValues ? cookieValues : null;
+				probability = cookieValues ? parseInt(cookieValues[2]) : null;
+				wasUserLucky = cookieValues ? parseInt(cookieValues[1]) : null;
+				drawTime = cookieValues ? parseInt(cookieValues[0]) : null;
+
+				if (
+					_testOptions.redrawOnProbabilityChange &&
+					force == 0 &&
+					probability !== null && probability != _testOptions.probability &&
+					wasUserLucky !== null && !wasUserLucky
+				) {
+					var logMessage = 'The user has been previously drawn on ' + new Date(drawTime);
+					logMessage += ' and was ';
+					logMessage += (wasUserLucky ? '' : 'un') + 'lucky, ';
+					logMessage += ' but by probabilty change from ';
+					logMessage += probability;
+					logMessage += ' to ';
+					logMessage += _testOptions.probability;
+					logMessage += ' it will be redrawned (redrawOnProbabilityChange = true)';
+
+					_log(logMessage)
+					cookieValues = null;
+				}
+
+				cookieValues = cookieValues ? cookieValues :
+					new Array(NOW, _drawUser(_testOptions.probability), _testOptions.probability, _testOptions.audience);
+				cookieValue = cookieValues.join(';');
+
+				drawTime = parseInt(cookieValues[0]) || 0;
+				wasUserLucky = _luckiness = parseInt(cookieValues[1]) > 0;
+				probability = parseInt(cookieValues[2]) || null;
+
+				_log('The user has been drawn on ' + new Date(drawTime) +
+					(drawTime == NOW ? ' (just now!)' : '') + ' and was ' +
+					(wasUserLucky ? '' : 'un') + 'lucky.');
+
+				var expirationDate = NOW - drawTime <= _getTime(_testOptions.maxSession) ?
+					new Date(NOW + _getTime(_testOptions.session)) : null;
+
+				_log('The user has' + (expirationDate ? ' not' : '') +
+					' reached maxSession. Cookie expires ' +
+					(expirationDate ? 'on ' + expirationDate : 'at the end of the current session.'));
+
+				_setCookie(COOKIE_PREFIX + _testName, cookieValue,
+					expirationDate, _testOptions.path, _testOptions.domain, _testOptions.secure);
+			}
+
+			_getCookie(COOKIE_PREFIX + _testName);
+			return _getCookie(COOKIE_PREFIX + _testName + '_isPartecipating') == isPartecipatingCookieValue;
 		}
 
 		/**
@@ -256,6 +393,19 @@ if (typeof ABTest == 'undefined') {
 		}
 
 		/**
+		 * Draws an user.
+		 *
+		 * @param  probability @type Number Probability percentage (range 0..100).
+		 * @return @type Number In range 0..1 0 => User is unlucky, 1 => User is lucky.
+		 */
+		function _drawUserElegibility(audience) {
+			var isUserElegible = ((Math.random() * 100 - audience) < 0);
+			_log('Is current user elegible ? Audience is ' + audience + '%... ' +
+				(isUserElegible ? 'Yes!' : 'No!'));
+			return new Number(isUserElegible);
+		}
+
+		/**
 		 * Converts a duration object to a microseconds time.
 		 *
 		 * @param  duration @type object Duration object:
@@ -269,12 +419,12 @@ if (typeof ABTest == 'undefined') {
 			var HOUR = 60 * MIN;
 			var DAY = 24 * HOUR;
 			duration = duration || {};
-			return (duration.days	 || 0) * DAY +
-				   (duration.day	 || 0) * DAY +
-				   (duration.hours	 || 0) * HOUR +
-				   (duration.hour	 || 0) * HOUR +
-				   (duration.minutes || 0) * MIN +
-				   (duration.minute	 || 0) * MIN;
+			return (duration.days || 0) * DAY +
+				(duration.day || 0) * DAY +
+				(duration.hours || 0) * HOUR +
+				(duration.hour || 0) * HOUR +
+				(duration.minutes || 0) * MIN +
+				(duration.minute || 0) * MIN;
 		}
 
 		/**
@@ -300,6 +450,16 @@ if (typeof ABTest == 'undefined') {
 				return cookieValue;
 			}
 			_log('Cookie ' + name + ' does not exist.');
+		}
+
+		/**
+		 * Delete a cookie.
+		 *
+		 * @param  name @type String Cookie name.
+		 */
+		_deleteCookie = function (name) {
+			_setCookie(name, '', new Date(),
+				_testOptions.path, _testOptions.domain, _testOptions.secure);
 		}
 
 		/**
@@ -337,9 +497,9 @@ if (typeof ABTest == 'undefined') {
 		function _setCookie(name, value, expires, path, domain, secure) {
 			var newCookie = name + '=' + escape(value) +
 				(expires ? '; expires=' + expires.toGMTString() : '') +
-				(path	 ? '; path='	+ path : '') +
-				(domain	 ? '; domain='	+ domain : '') +
-				(secure	 ? '; secure' : '');
+				(path ? '; path=' + path : '') +
+				(domain ? '; domain=' + domain : '') +
+				(secure ? '; secure' : '');
 			_log('Setting cookie: ' + newCookie);
 			document.cookie = newCookie;
 		}
@@ -351,9 +511,9 @@ if (typeof ABTest == 'undefined') {
 		 * @param  priority @type String Message priority (log, debug, info, warning, error).
 		 */
 		function _log(message, priority) {
-			_logEnabled && typeof console != 'undefined' && 
-				console[priority || 'debug']('[ABTest] %s: %s',
-				arguments.callee.caller.name || 'main', message);
+			_logEnabled && typeof console != 'undefined' &&
+				console[priority || 'log']('[ABTest] %s: %s',
+					arguments.callee.caller.name || 'main', message);
 		}
 
 		/**
